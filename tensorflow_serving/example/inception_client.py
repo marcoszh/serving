@@ -26,6 +26,7 @@ import sys
 import threading
 import logging
 import time
+from pprint import pprint
 
 from grpc.beta import implementations
 import tensorflow as tf
@@ -104,9 +105,9 @@ def _create_rpc_callback(result_counter):
       print(exception)
     else:
       # total_time = int((time.time() - start_time) * 1000)
-      sys.stdout.write(str(result_future)+'\n')
+      #sys.stdout.write(str(result_future)+'\n')
       sys.stdout.flush()
-      print(result_future)
+      pprint(vars(your_object))
     result_counter.inc_done()
     result_counter.dec_active()
   return _callback
