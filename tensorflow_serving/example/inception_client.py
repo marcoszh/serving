@@ -144,7 +144,7 @@ def do_inference(hostport, concurrency, num_tests):
           tf.contrib.util.make_tensor_proto(data, shape=[1]))
       result_counter.throttle()
       start_time = time.time()
-      result_future = stub.Predict.future(request, FLAGS.time_out)  # 5 seconds
+      result_future = stub.Predict.future(request, int(FLAGS.time_out))  # 5 seconds
       result_future.add_done_callback(
           _create_rpc_callback(result_counter))
   return result_counter.get_error_rate()
