@@ -103,7 +103,7 @@ def _create_rpc_callback(result_counter):
       result_counter.inc_error()
       print(exception)
     else:
-      total_time = int((time.time() - start_time) * 1000)
+      #total_time = int((time.time() - start_time) * 1000)
       sys.stdout.write(str(result_future)+'\n')
       sys.stdout.flush()
     result_counter.inc_done()
