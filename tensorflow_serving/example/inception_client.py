@@ -151,10 +151,13 @@ def do_inference(hostport, concurrency, num_tests):
 
 
 def main(_):
+  start_time = time.time()
   error_rate = do_inference(FLAGS.server,
                             FLAGS.concurrency, FLAGS.num_tests)
+  total_time = int((time.time() - start_time) * 1000)
   logging.info("test done")
   print('\nInference error rate: %s%%' % (error_rate * 100))
+  print('\nTime elapsed:%s' % total_time)
   # host, port = FLAGS.server.split(':')
   # channel = implementations.insecure_channel(host, int(port))
   # stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
