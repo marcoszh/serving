@@ -143,7 +143,7 @@ def do_inference(hostport, concurrency, num_tests):
       start_time = time.time()
       result_future = stub.Predict.future(request, 10.0)  # 5 seconds
       result_future.add_done_callback(
-          _create_rpc_callback(result_counter, time))
+          _create_rpc_callback(result_counter, start_time))
   return result_counter.get_error_rate()
 
 
