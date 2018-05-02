@@ -81,7 +81,7 @@ class _ResultCounter(object):
         self._condition.wait()
       self._active += 1
 
-def _create_rpc_callback(result_counter, time):
+def _create_rpc_callback(result_counter):
   """Creates RPC callback function.
 
   Args:
@@ -90,7 +90,7 @@ def _create_rpc_callback(result_counter, time):
   Returns:
     The callback function.
   """
-  def _callback(result_future, start_time):
+  def _callback(result_future):
     """Callback function.
 
     Calculates the statistics for the prediction result.
@@ -104,7 +104,7 @@ def _create_rpc_callback(result_counter, time):
       print(exception)
     else:
       total_time = int((time.time() - start_time) * 1000)
-      sys.stdout.write(str(total_time)+'\n')
+      sys.stdout.write(str(result_future)+'\n')
       sys.stdout.flush()
     result_counter.inc_done()
     result_counter.dec_active()
@@ -143,7 +143,7 @@ def do_inference(hostport, concurrency, num_tests):
       start_time = time.time()
       result_future = stub.Predict.future(request, 10.0)  # 5 seconds
       result_future.add_done_callback(
-          _create_rpc_callback(result_counter, start_time))
+          _create_rpc_callback(result_counter))
   return result_counter.get_error_rate()
 
 
