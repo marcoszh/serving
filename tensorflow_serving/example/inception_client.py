@@ -107,7 +107,7 @@ def _create_rpc_callback(result_counter):
       # total_time = int((time.time() - start_time) * 1000)
       #sys.stdout.write(str(result_future)+'\n')
       sys.stdout.flush()
-      pprint(vars(your_object))
+      pprint(vars(result_future))
     result_counter.inc_done()
     result_counter.dec_active()
   return _callback
