@@ -40,6 +40,7 @@ tf.app.flags.DEFINE_integer('num_tests', 1000, 'Number of test images')
 tf.app.flags.DEFINE_string('server', 'localhost:9000',
                            'PredictionService host:port')
 tf.app.flags.DEFINE_string('image', '', 'path to image in JPEG format')
+tf.app.flags.DEFINE_string('time_out', '', 'timeout')
 FLAGS = tf.app.flags.FLAGS
 
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
@@ -105,9 +106,9 @@ def _create_rpc_callback(result_counter):
       print(exception)
     else:
       # total_time = int((time.time() - start_time) * 1000)
-      #sys.stdout.write(str(result_future)+'\n')
+      sys.stdout.write('.')
       sys.stdout.flush()
-      pprint(vars(result_future))
+      #pprint(vars(result_future))
     result_counter.inc_done()
     result_counter.dec_active()
   return _callback
@@ -143,7 +144,7 @@ def do_inference(hostport, concurrency, num_tests):
           tf.contrib.util.make_tensor_proto(data, shape=[1]))
       result_counter.throttle()
       start_time = time.time()
-      result_future = stub.Predict.future(request, 10.0)  # 5 seconds
+      result_future = stub.Predict.future(request, FLAGS.time_out)  # 5 seconds
       result_future.add_done_callback(
           _create_rpc_callback(result_counter))
   return result_counter.get_error_rate()
