@@ -34,7 +34,7 @@ import tensorflow as tf
 from tensorflow_serving.apis import predict_pb2
 from tensorflow_serving.apis import prediction_service_pb2
 
-tf.app.flags.DEFINE_integer('concurrency', 30,
+tf.app.flags.DEFINE_integer('concurrency', 10,
                             'maximum number of concurrent inference requests')
 tf.app.flags.DEFINE_integer('num_tests', 1000, 'Number of test images')
 tf.app.flags.DEFINE_string('server', 'localhost:9000',
@@ -144,7 +144,7 @@ def do_inference(hostport, concurrency, num_tests):
           tf.contrib.util.make_tensor_proto(data, shape=[1]))
       result_counter.throttle()
       start_time = time.time()
-      result_future = stub.Predict.future(request, int(FLAGS.time_out))  # 5 seconds
+      result_future = stub.Predict.future(request, float(FLAGS.time_out))  # 5 seconds
       result_future.add_done_callback(
           _create_rpc_callback(result_counter))
   return result_counter.get_error_rate()

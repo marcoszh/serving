@@ -29,6 +29,7 @@ from __future__ import print_function
 
 import sys
 import threading
+import time
 
 # This is a placeholder for a Google-internal import.
 
@@ -46,6 +47,7 @@ tf.app.flags.DEFINE_integer('concurrency', 1,
 tf.app.flags.DEFINE_integer('num_tests', 100, 'Number of test images')
 tf.app.flags.DEFINE_string('server', '', 'PredictionService host:port')
 tf.app.flags.DEFINE_string('work_dir', '/tmp', 'Working directory. ')
+tf.app.flags.DEFINE_string('time_out', '', 'timeout')
 FLAGS = tf.app.flags.FLAGS
 
 
@@ -56,6 +58,7 @@ class _ResultCounter(object):
     self._num_tests = num_tests
     self._concurrency = concurrency
     self._error = 0
+    self._excp = 0
     self._done = 0
     self._active = 0
     self._condition = threading.Condition()
@@ -63,6 +66,11 @@ class _ResultCounter(object):
   def inc_error(self):
     with self._condition:
       self._error += 1
+
+  def inc_excp(self):
+    with self._condition:
+      self._error += 1
+      self._excp += 1
 
   def inc_done(self):
     with self._condition:
@@ -79,6 +87,12 @@ class _ResultCounter(object):
       while self._done != self._num_tests:
         self._condition.wait()
       return self._error / float(self._num_tests)
+
+  def get_excp_rate(self):
+    with self._condition:
+      while self._done != self._num_tests:
+        self._condition.wait()
+      return self._excp / float(self._num_tests)
 
   def throttle(self):
     with self._condition:
@@ -149,10 +163,10 @@ def do_inference(hostport, work_dir, concurrency, num_tests):
     request.inputs['images'].CopyFrom(
         tf.contrib.util.make_tensor_proto(image[0], shape=[1, image[0].size]))
     result_counter.throttle()
-    result_future = stub.Predict.future(request, 5.0)  # 5 seconds
+    result_future = stub.Predict.future(request, float(FLAGS.time_out))  # 5 seconds
     result_future.add_done_callback(
         _create_rpc_callback(label[0], result_counter))
-  return result_counter.get_error_rate()
+  return result_counter.get_error_rate(), result_counter.get_excp_rate()
 
 
 def main(_):
@@ -162,9 +176,13 @@ def main(_):
   if not FLAGS.server:
     print('please specify server host:port')
     return
-  error_rate = do_inference(FLAGS.server, FLAGS.work_dir,
+  start_time = time.time()
+  error_rate, excp_rate = do_inference(FLAGS.server, FLAGS.work_dir,
                             FLAGS.concurrency, FLAGS.num_tests)
+  total_time = int((time.time() - start_time) * 1000)
+  print('\nTime elapsed:%s' % total_time)
   print('\nInference error rate: %s%%' % (error_rate * 100))
+  print('\nInference excpetion rate: %s%%' % (excp_rate * 100))
 
 
 if __name__ == '__main__':
