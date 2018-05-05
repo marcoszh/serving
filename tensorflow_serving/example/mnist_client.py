@@ -170,9 +170,9 @@ def do_inference(hostport, work_dir, concurrency, num_tests):
 
 
 def main(_):
-  if FLAGS.num_tests > 10000:
-    print('num_tests should not be greater than 10k')
-    return
+  # if FLAGS.num_tests > 10000:
+  #   print('num_tests should not be greater than 10k')
+  #   return
   if not FLAGS.server:
     print('please specify server host:port')
     return
