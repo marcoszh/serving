@@ -121,7 +121,9 @@ def _create_rpc_callback(label, result_counter):
     exception = result_future.exception()
     if exception:
       result_counter.inc_error()
-      print(exception)
+      #print(exception)
+      sys.stdout.write('x')
+      sys.stdout.flush()
     else:
       sys.stdout.write('.')
       sys.stdout.flush()
