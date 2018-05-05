@@ -69,8 +69,8 @@ class _ResultCounter(object):
 
   def inc_excp(self):
     with self._condition:
-      self._error += 1
       self._excp += 1
+      self._error += 1
 
   def inc_done(self):
     with self._condition:
@@ -89,10 +89,7 @@ class _ResultCounter(object):
       return self._error / float(self._num_tests)
 
   def get_excp_rate(self):
-    with self._condition:
-      while self._done != self._num_tests:
-        self._condition.wait()
-      return self._excp / float(self._num_tests)
+    return self._excp / float(self._num_tests)
 
   def throttle(self):
     with self._condition:
@@ -120,7 +117,7 @@ def _create_rpc_callback(label, result_counter):
     """
     exception = result_future.exception()
     if exception:
-      result_counter.inc_error()
+      result_counter.inc_excp()
       #print(exception)
       sys.stdout.write('x')
       sys.stdout.flush()
