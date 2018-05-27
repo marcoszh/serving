@@ -157,7 +157,7 @@ def do_inference(hostport, concurrency, num_tests, batch_size):
 def main(_):
   start_time = time.time()
   error_rate = do_inference(FLAGS.server,
-                            FLAGS.concurrency, FLAGS.num_tests, FALGS.batch_size)
+                            FLAGS.concurrency, FLAGS.num_tests, FLAGS.batch_size)
   total_time = int((time.time() - start_time) * 1000)
   logging.info("test done")
   print('\nInference error rate: %s%%' % (error_rate * 100))
