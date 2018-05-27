@@ -139,7 +139,7 @@ def do_inference(hostport, concurrency, num_tests, batch_size):
     data = f.read()
     data_array = []
     for ic in range(batch_size):
-      data_array.append(data_array)
+      data_array.append(data)
     for _ in range(num_tests):
       request = predict_pb2.PredictRequest()
       request.model_spec.name = 'inception'
