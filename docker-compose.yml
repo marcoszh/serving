@@ -1,0 +1,20 @@
+version: "3"
+services:
+  inception:
+    # replace username/repo:tag with your name and image details
+    image: marcoszh/inception_serving:latest
+    command: serving/bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=inception --model_base_path=serving/inception-export
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.48"
+          memory: 6000M
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "9000:9000"
+    networks:
+      - webnet
+networks:
+  webnet:

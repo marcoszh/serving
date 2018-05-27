@@ -37,6 +37,7 @@ from tensorflow_serving.apis import prediction_service_pb2
 tf.app.flags.DEFINE_integer('concurrency', 10,
                             'maximum number of concurrent inference requests')
 tf.app.flags.DEFINE_integer('num_tests', 1000, 'Number of test images')
+tf.app.flags.DEFINE_integer('batch_size', 10, 'Number of test images')
 tf.app.flags.DEFINE_string('server', 'localhost:9000',
                            'PredictionService host:port')
 tf.app.flags.DEFINE_string('image', '', 'path to image in JPEG format')
@@ -114,7 +115,7 @@ def _create_rpc_callback(result_counter):
   return _callback
 
 
-def do_inference(hostport, concurrency, num_tests):
+def do_inference(hostport, concurrency, num_tests, batch_size):
   """Tests PredictionService with concurrent requests.
 
   Args:
@@ -136,12 +137,15 @@ def do_inference(hostport, concurrency, num_tests):
   logging.info("Start testing with " + str(num_tests) + " " + str(concurrency))
   with open(FLAGS.image, 'rb') as f:
     data = f.read()
+    data_array = []
+    for ic in range(batch_size):
+      image_data.append(data_array)
     for _ in range(num_tests):
       request = predict_pb2.PredictRequest()
       request.model_spec.name = 'inception'
       request.model_spec.signature_name = 'predict_images'
       request.inputs['images'].CopyFrom(
-          tf.contrib.util.make_tensor_proto(data, shape=[1]))
+          tf.contrib.util.make_tensor_proto(data_array, shape=[len(data_array)]))
       result_counter.throttle()
       start_time = time.time()
       result_future = stub.Predict.future(request, float(FLAGS.time_out))  # 5 seconds
@@ -153,7 +157,7 @@ def do_inference(hostport, concurrency, num_tests):
 def main(_):
   start_time = time.time()
   error_rate = do_inference(FLAGS.server,
-                            FLAGS.concurrency, FLAGS.num_tests)
+                            FLAGS.concurrency, FLAGS.num_tests, FALGS.batch_size)
   total_time = int((time.time() - start_time) * 1000)
   logging.info("test done")
   print('\nInference error rate: %s%%' % (error_rate * 100))
